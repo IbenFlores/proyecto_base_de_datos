@@ -1,10 +1,11 @@
--- Funci髇 para obtener todas las pistas de una lista de reproducci髇
+use spotify;
+-- Funci贸n para obtener todas las pistas de una lista de reproducci贸n
 CREATE FUNCTION dbo.ObtenerPistasEnLista (@id_lista INT)
 RETURNS TABLE
 AS
 RETURN
 (
-    SELECT
+    SELECT 
         p.id AS id_pista,
         p.nombre AS nombre_pista,
         a.titulo AS titulo_album,
@@ -19,15 +20,14 @@ RETURN
     INNER JOIN generos g ON p.id_genero = g.id
     WHERE pp.id_playlist = @id_lista
 );
-GO
 
--- Funci髇 para obtener suscripciones activas de un usuario
+-- Funci贸n para obtener suscripciones activas de un usuario
 CREATE FUNCTION dbo.ObtenerSuscripcionesActivasUsuario (@id_usuario INT)
 RETURNS TABLE
 AS
 RETURN
 (
-    SELECT
+    SELECT 
         s.id AS id_suscripcion,
         p.nombre AS nombre_plan,
         p.precio AS precio_plan,
@@ -38,9 +38,8 @@ RETURN
     WHERE s.id_usuario = @id_usuario
     AND GETDATE() BETWEEN s.fecha_inicio AND s.fecha_fin
 );
-GO
 
--- Funci髇 para obtener los artistas m醩 populares por n鷐ero de pistas
+-- Funci贸n para obtener los artistas m谩s populares por n煤mero de pistas
 CREATE FUNCTION dbo.ObtenerArtistasMasPistas (@top_n INT)
 RETURNS TABLE
 AS
@@ -56,15 +55,14 @@ RETURN
     GROUP BY a.nombre
     ORDER BY cantidad_pistas DESC
 );
-GO
 
--- Funci髇 para obtener el historial de reproducci髇 de un usuario
+-- Funci贸n para obtener el historial de reproducci贸n de un usuario
 CREATE FUNCTION dbo.ObtenerHistorialReproduccion (@id_usuario INT, @dias_atras INT)
 RETURNS TABLE
 AS
 RETURN
 (
-    SELECT
+    SELECT 
         p.nombre AS nombre_pista,
         a.titulo AS titulo_album,
         art.nombre AS nombre_artista,
@@ -77,17 +75,4 @@ RETURN
     WHERE h.id_usuario = @id_usuario
     AND h.fecha_reproduccion >= DATEADD(DAY, -@dias_atras, GETDATE())
 );
-GO
 
-
--- Obtener pistas de la lista de reproducci髇 con ID 5
-SELECT * FROM dbo.ObtenerPistasEnLista(5);
-
--- Obtener suscripciones activas del usuario con ID 3
-SELECT * FROM dbo.ObtenerSuscripcionesActivasUsuario(1);
-
--- Obtener suscripciones activas del usuario con ID 3
-SELECT * FROM dbo.ObtenerSuscripcionesActivasUsuario(2);
-
--- Obtener historial de reproducci髇 de los 鷏timos 7 d韆s para el usuario con ID 2
-SELECT * FROM dbo.ObtenerHistorialReproduccion(2, 7);

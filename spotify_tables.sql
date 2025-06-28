@@ -1,5 +1,5 @@
-﻿CREATE DATABASE spotify;
-USE spotify;
+﻿create database spotify;
+use spotify;
 
 -- Crear la tabla artistas
 CREATE TABLE artistas (
@@ -48,7 +48,7 @@ CREATE TABLE pistas (
     precio_unitario INT,
     CONSTRAINT fk_pistas_albumes FOREIGN KEY (id_album) REFERENCES albumes(id),
     CONSTRAINT fk_pistas_tipos_medios FOREIGN KEY (id_tipo_medio) REFERENCES tipos_medios(id),
-    CONSTRAINT fk_pistas_generos FOREIGN KEY (id_genero) REFERENCES generos(id)
+    CONSTRAINT fk_pistas_generos FOREIGN KEY (id_genero) REFERENCES�generos(id)
 
 );
 -- Crear la tabla de usuarios
@@ -56,7 +56,7 @@ CREATE TABLE usuarios (
     id INT IDENTITY(1,1) PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     correo VARCHAR(255) UNIQUE NOT NULL,
-    contraseña VARCHAR(255) NOT NULL,
+    contrase�a VARCHAR(255) NOT NULL,
     fecha_registro DATE DEFAULT GETDATE()
 );
 -- Crear la tabla de playlist (lista de reproduccion)
@@ -102,6 +102,14 @@ CREATE TABLE historial (
     CONSTRAINT fk_historial_pista FOREIGN KEY (id_pista) REFERENCES pistas(id)
 );
 
+CREATE TABLE seguimientos (
+    id_seguidor INT,
+    id_seguido INT,
+    fecha_creacion DATETIME DEFAULT GETDATE(), -- Almacena la fecha y hora del seguimiento
+    PRIMARY KEY (id_seguidor, id_seguido), -- Clave primaria compuesta para asegurar unicidad y evitar duplicados
+    CONSTRAINT fk_seguimientos_seguidor FOREIGN KEY (id_seguidor) REFERENCES usuarios(id),
+    CONSTRAINT fk_seguimientos_seguido FOREIGN KEY (id_seguido) REFERENCES usuarios(id)
+);
 
 
 

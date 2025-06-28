@@ -1,3 +1,5 @@
+use spotify;
+
 -- Índice para pistas por álbum, género y tipo de medio
 CREATE NONCLUSTERED INDEX IX_pistas_album_genero_tipo
 ON pistas (id_album, id_genero, id_tipo_medio)

@@ -1,9 +1,11 @@
+use spotify;
+
 -- ####################################################################
--- #                 PROCEDIMIENTOS ALMACENADOS SQL SERVER           #
+-- #                 PROCEDIMIENTOS ALMACENADOS SQL SERVER          #
 -- ####################################################################
 
 -- 1. Procedimiento para insertar un nuevo artista.
-GO
+-- Toma el nombre del artista como parï¿½metro e inserta un nuevo registro en la tabla 'artistas'.
 CREATE PROCEDURE sp_InsertarNuevoArtista
     @nombre_artista VARCHAR(255)
 AS
@@ -20,9 +22,8 @@ GO
 -- Ejemplo de uso:
 EXEC sp_InsertarNuevoArtista 'Nuevo Artista Ejemplo';
 
-
--- 2. Procedimiento para obtener todas las pistas de un álbum específico.
-GO
+-- 2. Procedimiento para obtener todas las pistas de un ï¿½lbum especï¿½fico.
+-- Toma el ID de un ï¿½lbum y devuelve una lista de todas las pistas de ese ï¿½lbum.
 CREATE PROCEDURE sp_ObtenerPistasPorAlbum
     @id_album INT
 AS
@@ -47,11 +48,20 @@ END;
 GO
 
 -- Ejemplo de uso:
-EXEC sp_ObtenerPistasPorAlbum 10;
+EXEC sp_ObtenerPistasPorAlbum 10; -- Suponiendo que 10 es un ID de ï¿½lbum vï¿½lido
 
 
--- 3. Procedimiento para registrar una nueva suscripción
-GO
+-- 3. PROCEDIMIENTO: sp_RegistrarNuevaSuscripcion
+-- DESCRIPCIï¿½N: Registra una nueva suscripciï¿½n para un usuario dado un plan.
+--              Verifica si el usuario y el plan existen. Si el plan tiene duraciï¿½n,
+--              calcula la fecha de fin. Si el usuario ya tiene una suscripciï¿½n activa,
+--              se podrï¿½a manejar de diferentes maneras (aquï¿½, simplemente se inserta una nueva,
+--              pero en un sistema real se podrï¿½a actualizar la existente o prohibir mï¿½ltiples).
+-- PARï¿½METROS:
+--   @id_usuario INT: El ID del usuario que se suscribe.
+--   @id_plan INT: El ID del plan al que el usuario se suscribe.
+-- RESULTADO:
+--   Un mensaje de ï¿½xito o error.
 CREATE PROCEDURE sp_RegistrarNuevaSuscripcion
     @id_usuario INT,
     @id_plan INT
@@ -70,7 +80,7 @@ BEGIN
         RETURN;
     END;
 
-    -- Verificar si el plan existe y obtener su duración
+    -- Verificar si el plan existe y obtener su duraciï¿½n
     SELECT @duracion_meses = duracion_meses, @nombre_plan = nombre
     FROM planes
     WHERE id = @id_plan;
@@ -81,7 +91,7 @@ BEGIN
         RETURN;
     END;
 
-    -- Calcular fecha_fin si el plan tiene duración
+    -- Calcular fecha_fin si el plan tiene duraciï¿½n
     IF @duracion_meses IS NOT NULL
     BEGIN
         SET @fecha_fin = DATEADD(month, @duracion_meses, @fecha_inicio);
@@ -91,20 +101,31 @@ BEGIN
         SET @fecha_fin = NULL; -- Para planes gratuitos sin fecha de fin
     END;
 
-    -- Insertar la nueva suscripción
+    -- Insertar la nueva suscripciï¿½n
     INSERT INTO suscripciones (id_usuario, id_plan, fecha_inicio, fecha_fin)
     VALUES (@id_usuario, @id_plan, @fecha_inicio, @fecha_fin);
 
-    SELECT 'Suscripción al plan "' + @nombre_plan + '" registrada correctamente para el usuario ' + CAST(@id_usuario AS VARCHAR(10)) AS Mensaje;
+    SELECT 'Suscripciï¿½n al plan "' + @nombre_plan + '" registrada correctamente para el usuario ' + CAST(@id_usuario AS VARCHAR(10)) AS Mensaje;
 END;
 GO
 
 -- Ejemplo de uso:
+-- Registrar una suscripciï¿½n Premium Anual (ID 3) para el usuario 1 (si ya tiene una, se aï¿½ade otra)
 EXEC sp_RegistrarNuevaSuscripcion @id_usuario = 1, @id_plan = 3;
 
+-- Registrar una suscripciï¿½n Estï¿½ndar (ID 2) para el usuario 6 (Diego Castro)
+EXEC sp_RegistrarNuevaSuscripcion @id_usuario = 6, @id_plan = 2;
 
--- 4. Procedimiento para obtener las pistas más reproducidas por género
-GO
+
+-- 4. PROCEDIMIENTO: sp_ObtenerTopPistasPorGenero
+-- DESCRIPCIï¿½N: Devuelve las N pistas mï¿½s reproducidas para un gï¿½nero especï¿½fico.
+--              Calcula el conteo de reproducciones de cada pista dentro del gï¿½nero
+--              y las ordena de mayor a menor.
+-- PARï¿½METROS:
+--   @id_genero INT: El ID del gï¿½nero para el cual se buscarï¿½n las pistas.
+--   @top_n INT: El nï¿½mero de pistas principales a devolver.
+-- RESULTADO:
+--   Un conjunto de resultados con las pistas principales y su conteo de reproducciones.
 CREATE PROCEDURE sp_ObtenerTopPistasPorGenero
     @id_genero INT,
     @top_n INT
@@ -112,10 +133,10 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Verificar si el género existe
+    -- Verificar si el gï¿½nero existe
     IF NOT EXISTS (SELECT 1 FROM generos WHERE id = @id_genero)
     BEGIN
-        SELECT 'Error: El género con el ID especificado no existe.' AS Mensaje;
+        SELECT 'Error: El gï¿½nero con el ID especificado no existe.' AS Mensaje;
         RETURN;
     END;
 
@@ -137,8 +158,13 @@ BEGIN
     ORDER BY
         TotalReproducciones DESC;
 END;
-GO
 
 -- Ejemplo de uso:
+-- Obtener las 3 pistas de Rock (ID 1) mï¿½s reproducidas
 EXEC sp_ObtenerTopPistasPorGenero @id_genero = 1, @top_n = 3;
+
+-- Obtener las 5 pistas de Pop (ID 2) mï¿½s reproducidas
 EXEC sp_ObtenerTopPistasPorGenero @id_genero = 2, @top_n = 5;
+
+
+
